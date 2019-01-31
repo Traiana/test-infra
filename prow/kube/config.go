@@ -40,7 +40,8 @@ func LoadClusterConfigs(kubeconfig, buildCluster string) (configurations map[str
 	if localCfg, err := rest.InClusterConfig(); err != nil {
 		logrus.Warnf("Failed to create in-cluster config: %v", err)
 	} else {
-		defCtx = new(string)
+		s := DefaultClusterAlias
+		defCtx = &s
 		logrus.Info("* in-cluster")
 		configs[*defCtx] = *localCfg
 	}
@@ -93,7 +94,7 @@ func LoadClusterConfigs(kubeconfig, buildCluster string) (configurations map[str
 		}
 		for alias, config := range raw {
 			cfg.Clusters[alias] = &clientcmdapi.Cluster{
-				Server:                   config.Endpoint,
+				Server: config.Endpoint,
 				CertificateAuthorityData: config.ClusterCACertificate,
 			}
 			cfg.AuthInfos[alias] = &clientcmdapi.AuthInfo{
