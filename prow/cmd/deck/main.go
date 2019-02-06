@@ -416,6 +416,7 @@ func initSpyglass(cfg config.Getter, o options, mux *http.ServeMux, ja *jobs.Job
 	if err != nil {
 		logrus.WithError(err).Fatal("Error getting GCS client")
 	}
+	logrus.Info("^^^^^^^^^^^^^^^^^^^^^^^^^Cfg:", fmt.Sprintf("%v", cfg().Deck.Spyglass.Viewers))
 	sg := spyglass.New(ja, cfg, c)
 
 	mux.Handle("/spyglass/static/", http.StripPrefix("/spyglass/static", staticHandlerFromDir(o.spyglassFilesLocation)))
@@ -732,6 +733,8 @@ func handleArtifactView(o options, sg *spyglass.Spyglass, cfg config.Getter) htt
 			http.Error(w, fmt.Sprintf("Failed to parse request: %v", err), http.StatusBadRequest)
 			return
 		}
+
+		logrus.Info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! handleArtifactView: ", request.Source, fmt.Sprintf("%v", request.Artifacts))
 
 		artifacts, err := sg.FetchArtifacts(request.Source, "", cfg().Deck.Spyglass.SizeLimit, request.Artifacts)
 		if err != nil {

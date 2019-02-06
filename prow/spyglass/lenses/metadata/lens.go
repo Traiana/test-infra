@@ -91,6 +91,7 @@ func (lens Lens) Body(artifacts []lenses.Artifact, resourceDir string, data stri
 	started := gcs.Started{}
 	finished := gcs.Finished{}
 	for _, a := range artifacts {
+
 		read, err := a.ReadAll()
 		if err != nil {
 			logrus.WithError(err).Error("Failed reading from artifact.")
@@ -99,7 +100,8 @@ func (lens Lens) Body(artifacts []lenses.Artifact, resourceDir string, data stri
 			if err = json.Unmarshal(read, &started); err != nil {
 				logrus.WithError(err).Error("Error unmarshaling started.json")
 			}
-			metadataViewData.StartTime = time.Unix(started.Timestamp, 0)
+			//metadataViewData.StartTime = time.Unix(started.Timestamp, 0)
+			metadataViewData.StartTime = time.Now()
 		} else if a.JobPath() == "finished.json" {
 			if err = json.Unmarshal(read, &finished); err != nil {
 				logrus.WithError(err).Error("Error unmarshaling finished.json")
@@ -108,6 +110,8 @@ func (lens Lens) Body(artifacts []lenses.Artifact, resourceDir string, data stri
 				metadataViewData.FinishedTime = time.Unix(*finished.Timestamp, 0)
 			}
 			metadataViewData.Status = finished.Result
+			logrus.Info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Result: ", metadataViewData.Status)
+
 		}
 	}
 

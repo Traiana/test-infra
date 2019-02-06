@@ -73,11 +73,15 @@ func New(ja *jobs.JobAgent, cfg config.Getter, c *storage.Client) *Spyglass {
 // Lenses gets all views of all artifact files matching each regexp with a registered lens
 func (s *Spyglass) Lenses(matchCache map[string][]string) []lenses.Lens {
 	ls := []lenses.Lens{}
+	logrus.Info("~~~~~~~~~~~~~~~~~~~~~~~~~Lenses: ", fmt.Sprintf("%v", matchCache))
 	for lensName, matches := range matchCache {
 		if len(matches) == 0 {
+			logrus.Info("no match: ", lensName)
 			continue
 		}
+
 		lens, err := lenses.GetLens(lensName)
+		logrus.Info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$match: ", lensName, lens.Name())
 		if err != nil {
 			logrus.WithField("lensName", lens).WithError(err).Error("Could not find artifact lens")
 		} else {
@@ -95,6 +99,7 @@ func (s *Spyglass) Lenses(matchCache map[string][]string) []lenses.Lens {
 		}
 		return pi < pj
 	})
+	logrus.Info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@Lenses result: ", fmt.Sprintf("%v", ls))
 	return ls
 }
 
