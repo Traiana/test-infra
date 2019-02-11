@@ -53,6 +53,10 @@ const (
 	// did not run this step.
 	PreviousErrorCode = internalCode + AbortedErrorCode
 
+	// SkippedCode indicates a skip marker was found so we
+	// did not run this step.
+	SkippedCode = internalCode + 111
+
 	// DefaultTimeout is the default timeout for the test
 	// process before SIGINT is sent
 	DefaultTimeout = 120 * time.Minute
@@ -129,6 +133,17 @@ func (o Options) ExecuteProcess() (int, error) {
 		if code != 0 {
 			logrus.Infof("Skipping as previous step exited %d", code)
 			return PreviousErrorCode, nil
+		}
+	}
+
+	if o.SkipMarkerFile != "" {
+		if _, err := os.Stat(o.SkipMarkerFile); err != nil {
+			if !os.IsNotExist(err) {
+				return InternalErrorCode, fmt.Errorf("failed to read skip marker %s: %v", o.SkipMarkerFile, err)
+			}
+		} else {
+			logrus.Info("Skipping as skip marker exists")
+			return SkippedCode, nil
 		}
 	}
 

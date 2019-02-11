@@ -369,6 +369,10 @@ func metadataFile(log coreapi.VolumeMount, prefix string) string {
 	return filepath.Join(ad, fmt.Sprintf("%s-metadata.json", prefix))
 }
 
+func skipMarkerFile(log coreapi.VolumeMount) string {
+	return filepath.Join(log.MountPath, fmt.Sprintf("skip.txt"))
+}
+
 func artifactsDir(log coreapi.VolumeMount) string {
 	return filepath.Join(log.MountPath, "artifacts")
 }
@@ -378,12 +382,15 @@ func entrypointLocation(tools coreapi.VolumeMount) string {
 }
 
 // InjectEntrypoint will make the entrypoint binary in the tools volume the container's entrypoint, which will output to the log volume.
-func InjectEntrypoint(c *coreapi.Container, timeout, gracePeriod time.Duration, prefix, previousMarker string, exitZero bool, log, tools coreapi.VolumeMount) (*wrapper.Options, error) {
+func InjectEntrypoint(c *coreapi.Container, timeout, gracePeriod time.Duration, prefix, previousMarker string, skipMarker, exitZero bool, log, tools coreapi.VolumeMount) (*wrapper.Options, error) {
 	wrapperOptions := &wrapper.Options{
 		Args:         append(c.Command, c.Args...),
 		ProcessLog:   processLog(log, prefix),
 		MarkerFile:   markerFile(log, prefix),
 		MetadataFile: metadataFile(log, prefix),
+	}
+	if skipMarker {
+		wrapperOptions.SkipMarkerFile = skipMarkerFile(log)
 	}
 	// TODO(fejta): use flags
 	entrypointConfigEnv, err := entrypoint.Encode(entrypoint.Options{
@@ -531,11 +538,12 @@ func decorate(spec *coreapi.PodSpec, pj *prowapi.ProwJob, rawEnv map[string]stri
 	spec.Containers[0].Env = append(spec.Containers[0].Env, kubeEnv(rawEnv)...)
 
 	const ( // these values may change when/if we support multiple containers
-		prefix   = "" // unique per container
-		previous = ""
-		exitZero = false
+		prefix     = "" // unique per container
+		previous   = ""
+		skipMarker = false
+		exitZero   = false
 	)
-	wrapperOptions, err := InjectEntrypoint(&spec.Containers[0], pj.Spec.DecorationConfig.Timeout, pj.Spec.DecorationConfig.GracePeriod, prefix, previous, exitZero, logMount, toolsMount)
+	wrapperOptions, err := InjectEntrypoint(&spec.Containers[0], pj.Spec.DecorationConfig.Timeout, pj.Spec.DecorationConfig.GracePeriod, prefix, previous, skipMarker, exitZero, logMount, toolsMount)
 	if err != nil {
 		return fmt.Errorf("wrap container: %v", err)
 	}

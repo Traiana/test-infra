@@ -35,6 +35,7 @@ func TestOptions_Run(t *testing.T) {
 		alwaysZero     bool
 		invalidMarker  bool
 		previousMarker string
+		skipMarker     bool
 		timeout        time.Duration
 		gracePeriod    time.Duration
 		expectedLog    string
@@ -122,6 +123,14 @@ func TestOptions_Run(t *testing.T) {
 			expectedMarker: strconv.Itoa(PreviousErrorCode),
 		},
 		{
+			name:           "return SkippedCode without running anything if skip marker exists",
+			skipMarker:     true,
+			args:           []string{"echo", "test"},
+			expectedLog:    "level=info msg=\"Skipping as skip marker exists\"\n",
+			expectedCode:   SkippedCode,
+			expectedMarker: strconv.Itoa(SkippedCode),
+		},
+		{
 			name:           "run passing command as normal if previous marker passed",
 			previousMarker: "0",
 			args:           []string{"sh", "-c", "exit 0"},
@@ -158,9 +167,10 @@ func TestOptions_Run(t *testing.T) {
 				Timeout:     testCase.timeout,
 				GracePeriod: testCase.gracePeriod,
 				Options: &wrapper.Options{
-					Args:       testCase.args,
-					ProcessLog: path.Join(tmpDir, "process-log.txt"),
-					MarkerFile: path.Join(tmpDir, "marker-file.txt"),
+					Args:           testCase.args,
+					ProcessLog:     path.Join(tmpDir, "process-log.txt"),
+					MarkerFile:     path.Join(tmpDir, "marker-file.txt"),
+					SkipMarkerFile: path.Join(tmpDir, "skip.txt"),
 				},
 			}
 
@@ -174,6 +184,12 @@ func TestOptions_Run(t *testing.T) {
 
 			if testCase.invalidMarker {
 				options.MarkerFile = "/this/had/better/not/be/a/real/file!@!#$%#$^#%&*&&*()*"
+			}
+
+			if testCase.skipMarker {
+				if err := ioutil.WriteFile(options.SkipMarkerFile, nil, 0600); err != nil {
+					t.Fatalf("could not create skip marker: %v", err)
+				}
 			}
 
 			if code := options.Run(); code != testCase.expectedCode {

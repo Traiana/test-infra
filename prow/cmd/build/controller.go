@@ -607,6 +607,7 @@ func tools() (coreapi.Volume, coreapi.VolumeMount) {
 
 func decorateSteps(steps []coreapi.Container, dc prowjobv1.DecorationConfig, toolsMount coreapi.VolumeMount) ([]wrapper.Options, error) {
 	const alwaysPass = true
+	const skipMarker = true
 	var entries []wrapper.Options
 	for i := range steps {
 		if steps[i].Name == "" {
@@ -617,7 +618,7 @@ func decorateSteps(steps []coreapi.Container, dc prowjobv1.DecorationConfig, too
 			previousMarker = entries[i-1].MarkerFile
 		}
 		// TODO(fejta): consider refactoring entrypoint to accept --expire=time.Now.Add(dc.Timeout) so we timeout each step correctly (assuming a good clock)
-		opt, err := decorate.InjectEntrypoint(&steps[i], dc.Timeout, dc.GracePeriod, steps[i].Name, previousMarker, alwaysPass, logMount, toolsMount)
+		opt, err := decorate.InjectEntrypoint(&steps[i], dc.Timeout, dc.GracePeriod, steps[i].Name, previousMarker, skipMarker, alwaysPass, logMount, toolsMount)
 		if err != nil {
 			return nil, fmt.Errorf("inject entrypoint into %s: %v", steps[i].Name, err)
 		}

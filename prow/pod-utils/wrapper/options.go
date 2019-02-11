@@ -54,6 +54,12 @@ type Options struct {
 	// Prow will parse the file and merge it into
 	// the `metadata` field in finished.json
 	MetadataFile string `json:"metadata_file"`
+
+	// If the file pointed by SkipMarkerFile exists,
+	// the test process is skipped.
+	// Test processes may write this file to indicate
+	// that all following steps should be skipped.
+	SkipMarkerFile string `json:"skip_marker_file,omitempty"`
 }
 
 // AddFlags adds flags to the FlagSet that populate
@@ -62,6 +68,7 @@ func (o *Options) AddFlags(fs *flag.FlagSet) {
 	fs.StringVar(&o.ProcessLog, "process-log", "", "path to the log where stdout and stderr are streamed for the process we execute")
 	fs.StringVar(&o.MarkerFile, "marker-file", "", "file we write the return code of the process we execute once it has finished running")
 	fs.StringVar(&o.MetadataFile, "metadata-file", "", "path to the metadata file generated from the job")
+	fs.StringVar(&o.SkipMarkerFile, "skip-marker-file", "", "file indicating the test process should be skipped")
 }
 
 // Validate ensures that the set of options are
