@@ -1045,6 +1045,36 @@ func (c *Client) ListIssueComments(org, repo string, number int) ([]IssueComment
 	return comments, nil
 }
 
+// ListIssues returns all issues in a repo.
+//
+// Each page of results consumes one API token.
+//
+// See https://developer.github.com/v3/issues/#list-issues
+func (c *Client) ListIssues(org, repo string, options ListIssuesOptions) ([]Issue, error) {
+	c.log("ListIssues", org, repo, options)
+	if c.fake {
+		return nil, nil
+	}
+	path := fmt.Sprintf("/repos/%s/%s/issues", org, repo)
+	values := url.Values(options.ToValues())
+	var issues []Issue
+	err := c.readPaginatedResultsWithValues(
+		path,
+		values,
+		acceptNone,
+		func() interface{} {
+			return &[]Issue{}
+		},
+		func(obj interface{}) {
+			issues = append(issues, *(obj.(*[]Issue))...)
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	return issues, nil
+}
+
 // GetPullRequests get all open pull requests for a repo.
 //
 // See https://developer.github.com/v3/pulls/#list-pull-requests

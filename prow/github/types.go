@@ -509,6 +509,41 @@ type IssueRequest struct {
 	Milestone *int     `json:"milestone,omitempty"`
 }
 
+// ListIssuesOptions allows filtering and sorting of issues returned from ListIssues
+//
+// See https://developer.github.com/v3/issues/#list-issues
+type ListIssuesOptions struct {
+	Filter    string     `json:"filter"`
+	State     string     `json:"state"`
+	Labels    []string   `json:"labels"`
+	Sort      string     `json:"sort"`
+	Direction string     `json:"direction"`
+	Since     *time.Time `json:"since"`
+}
+
+func (o ListIssuesOptions) ToValues() map[string][]string {
+	values := make(map[string][]string)
+	if o.Filter != "" {
+		values["filter"] = []string{o.Filter}
+	}
+	if o.State != "" {
+		values["state"] = []string{o.State}
+	}
+	if o.Sort != "" {
+		values["sort"] = []string{o.Sort}
+	}
+	if o.Direction != "" {
+		values["direction"] = []string{o.Direction}
+	}
+	if o.Since != nil {
+		values["since"] = []string{o.Since.String()}
+	}
+	if len(o.Labels) > 0 {
+		values["labels"] = o.Labels
+	}
+	return values
+}
+
 // StatusEvent fires whenever a git commit changes.
 //
 // See https://developer.github.com/v3/activity/events/types/#statusevent
