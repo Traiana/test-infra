@@ -2417,7 +2417,7 @@ func (c *client) CreateRef(org, repo, ref, SHA string) error {
 
 // CreateRef returns the SHA of the given ref, such as "heads/master".
 //
-// See https://developer.github.com/v3/git/refs/#create-a-reference
+// See https://developer.github.com/v3/git/tags/#create-a-tag-object
 func (c *client) CreateTag(org, repo, tag, massage, SHA, objType string, tagger Tagger) error {
 	body := struct {
 		Tag string `json:"tag"`
