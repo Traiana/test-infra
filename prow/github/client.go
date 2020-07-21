@@ -135,6 +135,8 @@ type CommitClient interface {
 	GetCombinedStatus(org, repo, ref string) (*CombinedStatus, error)
 	GetRef(org, repo, ref string) (string, error)
 	DeleteRef(org, repo, ref string) error
+	CreateRef(org, repo, ref, SHA string) error
+	CreateTag(org, repo, tag, message, SHA, objType string, tagger Tagger) (string, error)
 }
 
 // RepositoryClient interface for repository related API actions
@@ -2398,6 +2400,58 @@ func (c *client) GetRef(org, repo, ref string) (string, error) {
 		exitCodes: []int{200},
 	}, &res)
 	return res.Object["sha"], err
+}
+
+// CreateRef returns the SHA of the given ref, such as "heads/master".
+//
+// See https://developer.github.com/v3/git/refs/#create-a-reference
+func (c *client) CreateRef(org, repo, ref, SHA string) error {
+	c.log("CreateRef", org, repo)
+	body := struct {
+		Ref string `json:"ref"`
+		SHA string `json:"sha"`
+	}{
+		Ref: ref,
+		SHA: SHA,
+	}
+	_, err := c.request(&request{
+		method:    http.MethodPost,
+		path:      fmt.Sprintf("/repos/%s/%s/git/refs", org, repo),
+		exitCodes: []int{201},
+		requestBody: body,
+	}, nil)
+	return err
+}
+
+// CreateRef returns the SHA of the given ref, such as "heads/master".
+//
+// See https://developer.github.com/v3/git/tags/#create-a-tag-object
+func (c *client) CreateTag(org, repo, tag, message, SHA, objType string, tagger Tagger) (string, error) {
+	body := struct {
+		Tag     string `json:"tag"`
+		Message string `json:"message"`
+		Object  string `json:"object"`
+		Type    string `json:"type"`
+		Tagger  Tagger `json:"tagger"`
+	}{
+		Tag:     tag,
+		Message: message,
+		Object:  SHA,
+		Type:    objType,
+		Tagger:  tagger,
+	}
+
+	var resp struct {
+		SHA string `json:"sha"`
+	}
+	c.log("CreateTag", org, repo)
+	_, err := c.request(&request{
+		method:      http.MethodPost,
+		path:        fmt.Sprintf("/repos/%s/%s/git/tags", org, repo),
+		exitCodes:   []int{201},
+		requestBody: body,
+	}, &resp)
+	return resp.SHA, err
 }
 
 // DeleteRef deletes the given ref
