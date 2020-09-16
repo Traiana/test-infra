@@ -137,6 +137,7 @@ type CommitClient interface {
 	DeleteRef(org, repo, ref string) error
 	CreateRef(org, repo, ref, SHA string) error
 	CreateTag(org, repo, tag, message, SHA, objType string, tagger Tagger) (string, error)
+	CreateRelease(org, repo ,SHA, name, body string, draft, prerelease bool) error
 }
 
 // RepositoryClient interface for repository related API actions
@@ -2402,7 +2403,7 @@ func (c *client) GetRef(org, repo, ref string) (string, error) {
 	return res.Object["sha"], err
 }
 
-// CreateRef returns the SHA of the given ref, such as "heads/master".
+// CreateRef creates a ref for a specified commit.
 //
 // See https://developer.github.com/v3/git/refs/#create-a-reference
 func (c *client) CreateRef(org, repo, ref, SHA string) error {
@@ -2423,7 +2424,7 @@ func (c *client) CreateRef(org, repo, ref, SHA string) error {
 	return err
 }
 
-// CreateRef returns the SHA of the given ref, such as "heads/master".
+// CreateTag creates a named tag for a specified commit.
 //
 // See https://developer.github.com/v3/git/tags/#create-a-tag-object
 func (c *client) CreateTag(org, repo, tag, message, SHA, objType string, tagger Tagger) (string, error) {
@@ -2453,6 +2454,37 @@ func (c *client) CreateTag(org, repo, tag, message, SHA, objType string, tagger 
 	}, &resp)
 	return resp.SHA, err
 }
+
+// CreateRelease creates a release for a specified commit.
+//
+// see https://developer.github.com/v3/repos/releases/#create-a-release
+func (c *client) CreateRelease(org, repo ,SHA, name, body string, draft, prerelease bool) error {
+	reqBody := struct {
+		TagName     string `json:"tag_name"`
+		Name string `json:"name"`
+		TargetCommitish string `json:"target_commitish"`
+		Body string `json:"body"`
+		Draft bool `json:"draft"`
+		Prerelease bool `json:"prerelease"`
+	}{
+		TagName:        name,
+		Name:            name,
+		TargetCommitish: SHA,
+		Body:            body,
+		Draft:           draft,
+		Prerelease:      prerelease,
+	}
+
+	c.log("CreateRelease", org, repo)
+	_, err := c.request(&request{
+		method:      http.MethodPost,
+		path:        fmt.Sprintf("/repos/%s/%s/releases", org, repo),
+		exitCodes:   []int{201},
+		requestBody: reqBody,
+	}, nil)
+	return err
+}
+
 
 // DeleteRef deletes the given ref
 //
