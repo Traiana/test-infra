@@ -58,4 +58,8 @@ over builds and creating/deleting them infinitely. Somehow related to [kubernete
 
 - Exapnd BUILD_VERSION environment variable in entrypoint ([commit](https://github.com/traiana/test-infra/commit/dcff9a87d60d9ea8a02f4111e075b92714c6ddaf))
 
-- Add CreateRef and CreateTag method to github client ([commit](https://github.com/traiana/test-infra/commit/0fb5c8e9f7b93dbc6525d91df9d1915bcdd2203e)) 
+- Add CreateRef and CreateTag method to github client ([commit](https://github.com/traiana/test-infra/commit/0fb5c8e9f7b93dbc6525d91df9d1915bcdd2203e))
+
+- Add CreateRelease method to github client ([commit](https://github.com/traiana/test-infra/commit/6426914feb7c9e090198cb6c44b7691f2a194468))
+
+ 
