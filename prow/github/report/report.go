@@ -157,35 +157,35 @@ func Report(ghc GitHubClient, reportTemplate *template.Template, pj prowapi.Prow
 		return nil
 	}
 
-	ics, err := ghc.ListIssueComments(refs.Org, refs.Repo, refs.Pulls[0].Number)
-	if err != nil {
-		return fmt.Errorf("error listing comments: %v", err)
-	}
-	botNameChecker, err := ghc.BotUserChecker()
-	if err != nil {
-		return fmt.Errorf("error getting bot name checker: %w", err)
-	}
-	deletes, entries, updateID := parseIssueComments(pj, botNameChecker, ics)
-	for _, delete := range deletes {
-		if err := ghc.DeleteComment(refs.Org, refs.Repo, delete); err != nil {
-			return fmt.Errorf("error deleting comment: %v", err)
-		}
-	}
-	if len(entries) > 0 {
-		comment, err := createComment(reportTemplate, pj, entries)
-		if err != nil {
-			return fmt.Errorf("generating comment: %v", err)
-		}
-		if updateID == 0 {
-			if err := ghc.CreateComment(refs.Org, refs.Repo, refs.Pulls[0].Number, comment); err != nil {
-				return fmt.Errorf("error creating comment: %v", err)
-			}
-		} else {
-			if err := ghc.EditComment(refs.Org, refs.Repo, updateID, comment); err != nil {
-				return fmt.Errorf("error updating comment: %v", err)
-			}
-		}
-	}
+	// ics, err := ghc.ListIssueComments(refs.Org, refs.Repo, refs.Pulls[0].Number)
+	// if err != nil {
+	// 	return fmt.Errorf("error listing comments: %v", err)
+	// }
+	// botNameChecker, err := ghc.BotUserChecker()
+	// if err != nil {
+	// 	return fmt.Errorf("error getting bot name checker: %w", err)
+	// }
+	// deletes, entries, updateID := parseIssueComments(pj, botNameChecker, ics)
+	// for _, delete := range deletes {
+	// 	if err := ghc.DeleteComment(refs.Org, refs.Repo, delete); err != nil {
+	// 		return fmt.Errorf("error deleting comment: %v", err)
+	// 	}
+	// }
+	// if len(entries) > 0 {
+	// 	comment, err := createComment(reportTemplate, pj, entries)
+	// 	if err != nil {
+	// 		return fmt.Errorf("generating comment: %v", err)
+	// 	}
+	// 	if updateID == 0 {
+	// 		if err := ghc.CreateComment(refs.Org, refs.Repo, refs.Pulls[0].Number, comment); err != nil {
+	// 			return fmt.Errorf("error creating comment: %v", err)
+	// 		}
+	// 	} else {
+	// 		if err := ghc.EditComment(refs.Org, refs.Repo, updateID, comment); err != nil {
+	// 			return fmt.Errorf("error updating comment: %v", err)
+	// 		}
+	// 	}
+	// }
 	return nil
 }
 

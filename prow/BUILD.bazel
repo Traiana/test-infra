@@ -58,6 +58,18 @@ prow_push(
 )
 
 prow_push(
+    name = "okro-release-push",
+    bundle_name = "okro-release",
+    images = tags(
+        cmds = [
+            "deck",
+            "crier",
+        ],
+        targets = {},
+    ),
+)
+
+prow_push(
     name = "testimage-push",
     bundle_name = "testimage",
     images = image_tags(

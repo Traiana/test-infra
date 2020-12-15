@@ -187,3 +187,9 @@ checkconfig-image: bazel-release-push
 crier-image: bazel-release-push
 
 .PHONY: crier-image checkconfig-image
+
+# make sure you're authenticated to repo.okro.io
+okro-bazel-release-push:
+	PROW_REPO_OVERRIDE=repo.okro.io/docker-local/prow bazel run //prow:okro-release-push --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
+
+.PHONY: okro-bazel-release-push
