@@ -583,7 +583,7 @@ function redraw(fz: FuzzySearch, pushState: boolean = true): void {
         if ((agent === "kubernetes" && pod_name) || agent !== "kubernetes") {
             const logIcon = icon.create("description", "Build log");
             if (pod_spec == null || pod_spec.containers.length <= 1) {
-                logIcon.href = `log?job=${job}&id=${build_id}`;
+                logIcon.href = url;
             } else {
                 // this logic exists for legacy jobs that are configured for gubernator compatibility
                 const buildIndex = url.indexOf('/build/');
@@ -603,8 +603,8 @@ function redraw(fz: FuzzySearch, pushState: boolean = true): void {
         } else {
             r.appendChild(cell.text(""));
         }
-        r.appendChild(createRerunCell(modal, rerunCommand, prowJobName));
-        r.appendChild(createViewJobCell(prowJobName));
+        //r.appendChild(createRerunCell(modal, rerunCommand, prowJobName));
+        //r.appendChild(createViewJobCell(prowJobName));
         const key = groupKey(build);
         if (key !== lastKey) {
             // This is a different PR or commit than the previous row.
