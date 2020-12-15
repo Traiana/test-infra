@@ -56,6 +56,18 @@ prow_push(
     ),
 )
 
+prow_push(
+    name = "okro-release-push",
+    bundle_name = "okro-release",
+    images = tags(
+        cmds = [
+            "deck",
+            "crier",
+        ],
+        targets = {},
+    ),
+)
+
 filegroup(
     name = "package-srcs",
     srcs = glob(["**"]),
