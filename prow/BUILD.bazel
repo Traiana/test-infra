@@ -63,6 +63,7 @@ prow_push(
         cmds = [
             "deck",
             "crier",
+            "hook",
         ],
         targets = {},
     ),
